@@ -1,26 +1,5 @@
-{ config, pkgs, lib, ... }:
-
-let
-  getenv = name:
-    builtins.getEnv "RPINX_${name}";
-
-  getEnvOrFail = name:
-    let
-      v = builtins.getEnv "RPINX_${name}";
-    in if v == "" then
-      builtins.throw ( "ERROR: environment variable RPINX_${name} must be set (${v}) (e.g. export RPINX_${name}=...)" )
-    else v;
-
-  rpi = {
-    user = getEnvOrFail "USER";
-    user_password = getEnvOrFail "USER_PASS";
-    ssid = getenv "WIFI";
-    ssid_password = getEnvOrFail "WIFI_PASS";
-    interface = getEnvOrFail "INTERFACE";
-    hostname = getEnvOrFail "HOSTNAME";
-  };
-in {
-
+{ config, pkgs, rpi, ... }:
+{
   imports = [
     ./printer.nix
   ];
