@@ -1,18 +1,38 @@
 { config, pkgs, lib, ... }:
 
 let
-  user = "nxadmin";
-  password = "system";
-  SSID = "house";
-  SSIDpassword = "zsolt3131";
-  interface = "wlan0";
-  hostname = "pi3Nix";
+  getenv = name:
+    builtins.getEnv "RPINX_${name}";
+
+  getEnvOrFail = name:
+    let
+      v = builtins.getEnv "RPINX_${name}";
+    in if v == "" then
+      builtins.throw ( "ERROR: environment variable RPINX_${name} must be set (${v}) (e.g. export RPINX_${name}=...)" )
+    else v;
+
+  rpi = {
+    user = getEnvOrFail "USER";
+    user_password = getEnvOrFail "USER_PASS";
+    ssid = getenv "WIFI";
+    ssid_password = getEnvOrFail "WIFI_PASS";
+    interface = getEnvOrFail "INTERFACE";
+    hostname = getEnvOrFail "HOSTNAME";
+  };
 in {
+
+  imports = [
+    ./printer.nix
+  ];
 
   # NixOS wants to enable GRUB by default
   boot.loader.grub.enable = false;
   # Enables the generation of /boot/extlinux/extlinux.conf
   boot.loader.generic-extlinux-compatible.enable = true;
+
+  nix.extraOptions = ''
+    experimental-features = nix-command flakes
+  '';
 
   ## boot = {
   ##   # kernelPackages = pkgs.linuxKernel.packages.linux_rpi4;
@@ -40,11 +60,11 @@ in {
 
   networking = {
     enableIPv6	= false;
-    hostName = hostname;
+    hostName = rpi.hostname;
     wireless = {
-      enable = true;
-      networks."${SSID}".psk = SSIDpassword;
-      interfaces = [ interface ];
+      enable = rpi.ssid != "" ;
+      networks."${rpi.ssid}".psk = rpi.ssid_password;
+      interfaces = [ rpi.interface ];
     };
   };
 
@@ -54,16 +74,20 @@ in {
 
   users = {
     mutableUsers = true;
-    users."${user}" = {
+    users."${rpi.user}" = {
       isNormalUser = true;
-      password = password;
-      extraGroups = [ 
-        "wheel" 
+      password = rpi.user_password;
+      extraGroups = [
+        "wheel"
       ];
       openssh.authorizedKeys.keys = [
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICgcJfi0dZotMWa8zQvxXduM76GmQfoPvMU5FjIFZCAa alfonzso@gmail.com"
       ];
-      # password = "redacted";
+    };
+    users.root = {
+      openssh.authorizedKeys.keys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICgcJfi0dZotMWa8zQvxXduM76GmQfoPvMU5FjIFZCAa alfonzso@gmail.com"
+      ];
     };
   };
 
