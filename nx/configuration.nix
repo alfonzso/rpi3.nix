@@ -1,8 +1,5 @@
-{ config, pkgs, rpi, ... }:
-{
-  imports = [
-    ./printer.nix
-  ];
+{ pkgs, rpi, ... }: {
+  imports = [ ./zram.nix ./printer.nix ];
 
   # NixOS wants to enable GRUB by default
   boot.loader.grub.enable = false;
@@ -38,16 +35,24 @@
   };
 
   networking = {
-    enableIPv6	= false;
+    enableIPv6 = false;
     hostName = rpi.hostname;
     wireless = {
-      enable = rpi.ssid != "" ;
+      enable = rpi.ssid != "";
       networks."${rpi.ssid}".psk = rpi.ssid_password;
       interfaces = [ rpi.interface ];
     };
   };
 
-  environment.systemPackages = with pkgs; [ neofetch tmux vim htop iotop nmon libraspberrypi ];
+  environment.systemPackages = with pkgs; [
+    neofetch
+    tmux
+    vim
+    htop
+    iotop
+    nmon
+    libraspberrypi
+  ];
 
   services.openssh.enable = true;
 
@@ -56,9 +61,7 @@
     users."${rpi.user}" = {
       isNormalUser = true;
       password = rpi.user_password;
-      extraGroups = [
-        "wheel"
-      ];
+      extraGroups = [ "wheel" ];
       openssh.authorizedKeys.keys = [
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICgcJfi0dZotMWa8zQvxXduM76GmQfoPvMU5FjIFZCAa alfonzso@gmail.com"
       ];
@@ -73,4 +76,3 @@
   hardware.enableRedistributableFirmware = true;
   system.stateVersion = "25.05";
 }
-
