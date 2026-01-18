@@ -1,4 +1,4 @@
-{ pkgs, rpi, ... }: {
+{ pkgs, rpi, lib, ... }: {
   imports = [ ./zram.nix ./printer.nix ];
 
   # NixOS wants to enable GRUB by default
@@ -9,6 +9,8 @@
   nix.extraOptions = ''
     experimental-features = nix-command flakes
   '';
+
+  time.timeZone = "Europe/Budapest";
 
   ## boot = {
   ##   # kernelPackages = pkgs.linuxKernel.packages.linux_rpi4;
@@ -26,13 +28,40 @@
   ##   };
   ## };
 
-  fileSystems = {
+  # fileSystems."/" = {
+  #   device =
+  #     # lib.mkDefault "/dev/disk/by-uuid/6d2671ee-6e68-4386-8ffc-965b73b79d7e";
+  #     lib.mkForce "/dev/disk/by-uuid/6d2671ee-6e68-4386-8ffc-965b73b79d7e";
+  #   fsType = "ext4";
+  #   options = [ "noatime" ];
+  # };
+  # # fileSystems."/boot" = lib.mkForce null;
+  # fileSystems."/boot" = lib.mkForce { neededForBoot = false; };
+
+  # NOTE: force ffileSystems to have one section, so /boot will be ignored/removed
+  fileSystems = lib.mkForce {
     "/" = {
-      device = "/dev/disk/by-label/NIXOS_SD";
+      device = "/dev/disk/by-uuid/6d2671ee-6e68-4386-8ffc-965b73b79d7e";
       fsType = "ext4";
       options = [ "noatime" ];
     };
   };
+
+  # NOTE: nixos needs lot of space in /boots
+  # which usually has only 256Mb/1Gb space
+  # NOTE: in the future, create 1Gb space for /boot ...
+  # fileSystems."/boot" = {
+  #   device = lib.mkDefault "/dev/disk/by-uuid/BEDB-C34F";
+  #   fsType = "vfat";
+  #   options = [ "fmask=0022" "dmask=0022" ];
+  # };
+
+  boot.kernelParams =
+    [ "usbcore.autosuspend=-1" "dwc_otg.lpm_enable=0" "rootwait" ];
+
+  documentation.nixos.enable = false;
+  nix.gc.automatic = true;
+  nix.gc.options = "--delete-older-than 30d";
 
   networking = {
     enableIPv6 = false;
@@ -52,6 +81,10 @@
     iotop
     nmon
     libraspberrypi
+    python312
+    python312Packages.pip
+    gcc
+    pigpio
   ];
 
   services.openssh.enable = true;

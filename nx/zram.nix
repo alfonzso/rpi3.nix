@@ -3,7 +3,8 @@
   zramSwap.memoryPercent = 50;
 
   # 2. /tmp in RAM (no temp file writes)
-  boot.tmpOnTmpfs = true;
+  # boot.tmpOnTmpfs = true;
+  boot.tmp.useTmpfs = true;
 
   # 3. Reduce logging writes
   services.journald.extraConfig = ''
