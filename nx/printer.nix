@@ -8,6 +8,20 @@ let
     ghostscript
   ];
 in {
+
+  hardware.printers = {
+    ensurePrinters = [{
+      name = "Samsung_ML-2580N";
+      location = "Local Printer";
+      deviceUri =
+        "dnssd://Samsung%20ML-2580N%20(samu-printer)._printer._tcp.local/";
+      # model = "drv:///samsung/ml2580n.ppd";
+      model = "samsung/ml2580n.ppd";
+      ppdOptions = { PageSize = "A4"; };
+    }];
+    ensureDefaultPrinter = "Samsung_ML-2580N";
+  };
+
   services.printing = {
     enable = true;
     webInterface = true; # enable http://localhost:631/ (CUPS web UI)

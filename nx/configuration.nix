@@ -1,9 +1,7 @@
-{ pkgs, config , lib, ... }:
-let
-  rpi = config.rpi;
-in
+{ pkgs, config, lib, ... }:
+let rpi = config.rpi;
 
-{
+in {
   imports = [ ./zram.nix ./printer.nix ];
 
   # NixOS wants to enable GRUB by default
@@ -82,14 +80,23 @@ in
     neofetch
     tmux
     vim
-    htop
-    iotop
-    nmon
     libraspberrypi
     python312
     python312Packages.pip
     gcc
     pigpio
+
+    dig
+    htop
+    iotop
+    ncdu
+    nmon
+    pciutils # lspci
+    ps # ps aux
+    socat
+    # unixtools.net-tools
+    nettools
+    usbutils # lsusb
   ];
 
   services.openssh.enable = true;
