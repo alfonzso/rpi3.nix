@@ -24,13 +24,6 @@
           "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
           ./nx/configuration.nix
           ./nx/rpi3-config.nix
-          # {
-          #   config.rpi.user = "nxadmin";
-          #   config.rpi.user_password = "nxadmin";
-          #   config.rpi.hostname = "rpi3Nix";
-          #   config.rpi.wifi.ssid = "house";
-          #   config.rpi.wifi.ssid_password = "zsolt3131";
-          # }
         ];
       };
     };
