@@ -1,4 +1,9 @@
-{ pkgs, rpi, lib, ... }: {
+{ pkgs, config , lib, ... }:
+let
+  rpi = config.rpi;
+in
+
+{
   imports = [ ./zram.nix ./printer.nix ];
 
   # NixOS wants to enable GRUB by default
@@ -67,9 +72,9 @@
     enableIPv6 = false;
     hostName = rpi.hostname;
     wireless = {
-      enable = rpi.ssid != "";
-      networks."${rpi.ssid}".psk = rpi.ssid_password;
-      interfaces = [ rpi.interface ];
+      enable = rpi.wifi.ssid != "";
+      networks."${rpi.wifi.ssid}".psk = rpi.wifi.ssid_password;
+      interfaces = [ rpi.wifi.interface ];
     };
   };
 
