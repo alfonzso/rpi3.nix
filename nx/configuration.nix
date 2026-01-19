@@ -9,6 +9,14 @@ in {
   # Enables the generation of /boot/extlinux/extlinux.conf
   boot.loader.generic-extlinux-compatible.enable = true;
 
+  # overlay test
+  nixpkgs.overlays = [
+    (self: super: {
+      python3 = super.python312;
+      python3Packages = super.python312Packages;
+    })
+  ];
+
   nix.extraOptions = ''
     experimental-features = nix-command flakes
   '';
@@ -31,24 +39,26 @@ in {
   ##   };
   ## };
 
-  # fileSystems."/" = {
-  #   device =
-  #     # lib.mkDefault "/dev/disk/by-uuid/6d2671ee-6e68-4386-8ffc-965b73b79d7e";
-  #     lib.mkForce "/dev/disk/by-uuid/6d2671ee-6e68-4386-8ffc-965b73b79d7e";
-  #   fsType = "ext4";
-  #   options = [ "noatime" ];
-  # };
-  # # fileSystems."/boot" = lib.mkForce null;
-  # fileSystems."/boot" = lib.mkForce { neededForBoot = false; };
-
-  # NOTE: force ffileSystems to have one section, so /boot will be ignored/removed
-  fileSystems = lib.mkForce {
-    "/" = {
-      device = "/dev/disk/by-uuid/6d2671ee-6e68-4386-8ffc-965b73b79d7e";
-      fsType = "ext4";
-      options = [ "noatime" ];
-    };
+  fileSystems."/" = {
+    device =
+      lib.mkDefault "/dev/disk/by-uuid/a887fb09-947b-433a-a2a0-788006fec642";
+    fsType = "ext4";
   };
+
+  fileSystems."/boot" = {
+    device = lib.mkDefault "/dev/disk/by-uuid/0772-96FE";
+    fsType = "vfat";
+    options = [ "fmask=0022" "dmask=0022" ];
+  };
+
+  # # NOTE: force fileSystems to have one section, so /boot will be ignored/removed
+  # fileSystems = lib.mkForce {
+  #   "/" = {
+  #     device = "/dev/disk/by-uuid/6d2671ee-6e68-4386-8ffc-965b73b79d7e";
+  #     fsType = "ext4";
+  #     options = [ "noatime" ];
+  #   };
+  # };
 
   # NOTE: nixos needs lot of space in /boots
   # which usually has only 256Mb/1Gb space

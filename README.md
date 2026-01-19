@@ -16,7 +16,11 @@ outputs.nixosConfigurations.rpi.config.networking.wireless
 
     ```bash
     LETTER=X
-    sudo fdisk /dev/sd$LETTER
+
+    if ! command -v git >/dev/null 2>&1; then
+      echo "git not found" >&2
+      exit 1
+    fi
 
     printf "o\nn\np\n1\n2048\n+1G\nt\nb\nw\n" | sudo fdisk /dev/sd$LETTER
     # ^ This will do the follows:
@@ -30,6 +34,7 @@ outputs.nixosConfigurations.rpi.config.networking.wireless
     # +1G # size
     # t     # change type
     # b     # W95 FAT32
+    sync
 
     printf "n\np\n2\n\n\nt\n2\n83\nw\n" | sudo fdisk /dev/sd$LETTER
     # ^ This will do the follows:
@@ -42,8 +47,11 @@ outputs.nixosConfigurations.rpi.config.networking.wireless
     # t     # change type if needed
     # 83    # Linux
 
+    sync
     sudo mkfs.vfat -F32 /dev/sd${LETTER}1 -n BOOT
+    sync
     sudo mkfs.ext4 /dev/sd${LETTER}2 -L NIXOS
+    sync
 
     sudo mkdir -p /mnt
     sudo mount /dev/sd${LETTER}2 /mnt
@@ -52,12 +60,12 @@ outputs.nixosConfigurations.rpi.config.networking.wireless
 
     # i am not sure about this, i used another rpi_nixos image/system, and firmware already
     # there in /boot partition so i copied over for the new system
-    git clone --depth 1 https://github.com/raspberrypi/firmware.git
-    sudo cp -r firmware/boot/* /mnt/boot/
+    git clone --depth 1 https://github.com/alfonzso/rpi3.nix.git
+    sudo cp -r rpi3.nix/boot/* /mnt/boot/
 
     # NOTE: if you need config.txt you can find at project-root/configs/config.txt
     ```
-4) nixos-generate-config --root /mnt
+4) sudo nixos-generate-config --root /mnt
 
 5) after step 4, edit /mnt/etc/nixos/configuration.nix file accordingly
     == you will need user, with openssh public file, enable wlan or connect via ethernet ==
