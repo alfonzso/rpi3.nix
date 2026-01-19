@@ -9,13 +9,13 @@ in {
   # Enables the generation of /boot/extlinux/extlinux.conf
   boot.loader.generic-extlinux-compatible.enable = true;
 
-  # overlay test
-  nixpkgs.overlays = [
-    (self: super: {
-      python3 = super.python312;
-      python3Packages = super.python312Packages;
-    })
-  ];
+  # # overlay test
+  # nixpkgs.overlays = [
+  #   (self: super: {
+  #     python3 = super.python312;
+  #     python3Packages = super.python312Packages;
+  #   })
+  # ];
 
   nix.extraOptions = ''
     experimental-features = nix-command flakes
