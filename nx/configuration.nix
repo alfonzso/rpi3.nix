@@ -9,7 +9,6 @@ in {
   # Enables the generation of /boot/extlinux/extlinux.conf
   boot.loader.generic-extlinux-compatible.enable = true;
 
-  # # overlay test
   # nixpkgs.overlays = [
   #   (self: super: {
   #     python3 = super.python312;
@@ -39,17 +38,31 @@ in {
   ##   };
   ## };
 
-  fileSystems."/" = {
-    device =
-      lib.mkDefault "/dev/disk/by-uuid/a887fb09-947b-433a-a2a0-788006fec642";
-    fsType = "ext4";
-  };
-
-  fileSystems."/boot" = {
+  fileSystems = lib.mkForce {
+    "/" = {
+      device = "/dev/disk/by-uuid/a887fb09-947b-433a-a2a0-788006fec642";
+      fsType = "ext4";
+      # options = [ "noatime" ];
+    };
+    "/boot" = {
     device = lib.mkDefault "/dev/disk/by-uuid/0772-96FE";
     fsType = "vfat";
     options = [ "fmask=0022" "dmask=0022" ];
+    };
+
   };
+
+  # fileSystems."/" = {
+  #   device =
+  #     lib.mkDefault "/dev/disk/by-uuid/a887fb09-947b-433a-a2a0-788006fec642";
+  #   fsType = "ext4";
+  # };
+
+  # fileSystems."/boot" = {
+  #   device = lib.mkDefault "/dev/disk/by-uuid/0772-96FE";
+  #   fsType = "vfat";
+  #   options = [ "fmask=0022" "dmask=0022" ];
+  # };
 
   # # NOTE: force fileSystems to have one section, so /boot will be ignored/removed
   # fileSystems = lib.mkForce {
@@ -69,8 +82,8 @@ in {
   #   options = [ "fmask=0022" "dmask=0022" ];
   # };
 
-  boot.kernelParams =
-    [ "usbcore.autosuspend=-1" "dwc_otg.lpm_enable=0" "rootwait" ];
+  # boot.kernelParams =
+  #   [ "usbcore.autosuspend=-1" "dwc_otg.lpm_enable=0" "rootwait" ];
 
   documentation.nixos.enable = false;
   nix.gc.automatic = true;
@@ -110,6 +123,9 @@ in {
   ];
 
   services.openssh.enable = true;
+
+  boot.initrd.kernelModules = [ "vc4" "bcm2835_dma" "i2c_bcm2835" ];
+  boot.kernelParams = ["cma=320M"];
 
   users = {
     mutableUsers = true;
