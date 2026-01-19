@@ -61,7 +61,7 @@ outputs.nixosConfigurations.rpi.config.networking.wireless
     # i am not sure about this, i used another rpi_nixos image/system, and firmware already
     # there in /boot partition so i copied over for the new system
     git clone --depth 1 https://github.com/alfonzso/rpi3.nix.git
-    sudo cp -r rpi3.nix/boot/* /mnt/boot/
+    sudotar xvf rpi3.nix/configs/firmwares/rpi3_fw.tar -C /mnt/boot
 
     # NOTE: if you need config.txt you can find at project-root/configs/config.txt
     ```

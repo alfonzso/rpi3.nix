@@ -97,9 +97,11 @@ in {
   };
 
   environment.systemPackages = with pkgs; [
-    neofetch
+    git
     tmux
     vim
+
+    neofetch
     libraspberrypi
     python312
     python312Packages.pip
