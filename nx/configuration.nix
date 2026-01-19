@@ -4,11 +4,19 @@ let rpi = config.rpi;
 in {
   imports = [ ./zram.nix ./printer.nix ];
 
+  nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";
+
+
   # NixOS wants to enable GRUB by default
   boot.loader.grub.enable = false;
   # Enables the generation of /boot/extlinux/extlinux.conf
   boot.loader.generic-extlinux-compatible.enable = true;
+  boot.initrd.availableKernelModules = [ "usb_storage" "usbhid" ];
+  boot.initrd.kernelModules = [ "vc4" "bcm2835_dma" "i2c_bcm2835" ];
+  # boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelParams = [ "cma=256M" "console=tty0" ];
 
+  hardware.enableRedistributableFirmware = true;
   # nixpkgs.overlays = [
   #   (self: super: {
   #     python3 = super.python312;
@@ -44,27 +52,15 @@ in {
       fsType = "ext4";
       # options = [ "noatime" ];
     };
-    "/boot" = {
-    device = lib.mkDefault "/dev/disk/by-uuid/0772-96FE";
-    fsType = "vfat";
-    options = [ "fmask=0022" "dmask=0022" ];
-    };
+    # "/boot" = {
+    #   device = lib.mkDefault "/dev/disk/by-uuid/0772-96FE";
+    #   fsType = "vfat";
+    #   options = [ "fmask=0022" "dmask=0022" ];
+    # };
 
   };
 
-  # fileSystems."/" = {
-  #   device =
-  #     lib.mkDefault "/dev/disk/by-uuid/a887fb09-947b-433a-a2a0-788006fec642";
-  #   fsType = "ext4";
-  # };
-
-  # fileSystems."/boot" = {
-  #   device = lib.mkDefault "/dev/disk/by-uuid/0772-96FE";
-  #   fsType = "vfat";
-  #   options = [ "fmask=0022" "dmask=0022" ];
-  # };
-
-  # # NOTE: force fileSystems to have one section, so /boot will be ignored/removed
+  # NOTE: force fileSystems to have one section, so /boot will be ignored/removed
   # fileSystems = lib.mkForce {
   #   "/" = {
   #     device = "/dev/disk/by-uuid/6d2671ee-6e68-4386-8ffc-965b73b79d7e";
@@ -91,6 +87,7 @@ in {
 
   networking = {
     enableIPv6 = false;
+    useDHCP = lib.mkDefault true;
     hostName = rpi.hostname;
     wireless = {
       enable = rpi.wifi.ssid != "";
@@ -124,9 +121,6 @@ in {
 
   services.openssh.enable = true;
 
-  boot.initrd.kernelModules = [ "vc4" "bcm2835_dma" "i2c_bcm2835" ];
-  boot.kernelParams = ["cma=320M"];
-
   users = {
     mutableUsers = true;
     users."${rpi.user}" = {
@@ -144,6 +138,5 @@ in {
     };
   };
 
-  hardware.enableRedistributableFirmware = true;
   system.stateVersion = "25.05";
 }
